@@ -1,0 +1,5 @@
+{
+  "name": "DB GajiKPPN Monitor",
+  "description": "A futuristic monitoring dashboard for database performance, featuring real-time data and performance charts.",
+  "requestFramePermissions": []
+}
