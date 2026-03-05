@@ -10,6 +10,14 @@ const port = 3001;
 app.use(cors());
 app.use(express.json());
 
+// Disable caching for all API routes
+app.use((req, res, next) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+    next();
+});
+
 // Store pools and database names per session
 const dbPools = new Map();
 const dbNames = new Map();
@@ -17,7 +25,8 @@ const dbNames = new Map();
 // Endpoint to test and set database connection
 app.post('/api/connect', async (req, res) => {
     const { host, port, user, password, database } = req.body;
-    const sessionId = req.headers['x-session-id'];
+    // Support both header and query param for session ID
+    const sessionId = req.headers['x-session-id'] || req.query.sessionId;
 
     if (!sessionId) {
         return res.status(400).json({ message: 'Session ID is required.' });
@@ -63,7 +72,7 @@ app.post('/api/connect', async (req, res) => {
 
 // Endpoint to fetch metrics
 app.get('/api/metrics', async (req, res) => {
-    const sessionId = req.headers['x-session-id'];
+    const sessionId = req.headers['x-session-id'] || req.query.sessionId;
     const dbPool = dbPools.get(sessionId);
     const currentDbName = dbNames.get(sessionId);
 
@@ -130,7 +139,7 @@ app.get('/api/metrics', async (req, res) => {
 
 // Endpoint to fetch InnoDB engine status
 app.get('/api/innodb-status', async (req, res) => {
-    const sessionId = req.headers['x-session-id'];
+    const sessionId = req.headers['x-session-id'] || req.query.sessionId;
     const dbPool = dbPools.get(sessionId);
 
     if (!dbPool) {

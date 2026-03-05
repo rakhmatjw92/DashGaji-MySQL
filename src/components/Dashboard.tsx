@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { MySQLMetrics, TimeSeriesDataPoint } from '../types';
+import { MySQLMetrics, TimeSeriesDataPoint, ThemeColor } from '../types';
 import MetricCard from './MetricCard';
 import ChartCard from './ChartCard';
 import LogListCard from './LogListCard';
@@ -29,9 +29,10 @@ interface DashboardProps {
     onConnectClick: () => void;
     setDatabaseName: (name: string) => void;
     sessionId: string;
+    color: ThemeColor;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ connectionStatus, connectionError, onConnectClick, setDatabaseName, sessionId }) => {
+const Dashboard: React.FC<DashboardProps> = ({ connectionStatus, connectionError, onConnectClick, setDatabaseName, sessionId, color }) => {
     const [metrics, setMetrics] = useState<MySQLMetrics>(initialState);
     const [history, setHistory] = useState<TimeSeriesDataPoint[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -93,50 +94,42 @@ const Dashboard: React.FC<DashboardProps> = ({ connectionStatus, connectionError
     }, [connectionStatus, fetchDataAndAnalysis, setDatabaseName]);
 
 
-    if (connectionStatus === 'disconnected' || connectionStatus === 'error') {
+    if (connectionStatus === 'error') {
         return (
             <div className="flex flex-col items-center justify-center h-[60vh] text-center">
                  <div className="bg-slate-900/50 border border-slate-700 p-8 rounded-lg">
-                    <DatabaseIcon className="w-12 h-12 mx-auto text-slate-500 mb-4" />
-                    <h2 className="text-2xl font-bold text-slate-300 mb-2">Not Connected</h2>
-                    <p className="text-slate-400 mb-6">
-                        {connectionStatus === 'error' 
-                            ? `Connection failed: ${connectionError}`
-                            : 'Please configure your database connection to begin monitoring.'
-                        }
-                    </p>
+                    <AlertTriangleIcon className="w-12 h-12 mx-auto text-red-500 mb-4" />
+                    <h2 className="text-2xl font-bold text-slate-300 mb-2">Connection Error</h2>
+                    <p className="text-red-400 mb-6">{connectionError}</p>
                     <button 
                         onClick={onConnectClick}
-                        className="px-6 py-2 bg-cyan-600 text-white rounded-md hover:bg-cyan-500 transition-colors shadow-[0_0_10px_rgba(56,189,248,0.4)]"
+                        className={`px-6 py-2 bg-${color}-600 text-white rounded-md hover:bg-${color}-500 transition-colors shadow-[0_0_10px_rgba(var(--color-${color}-500),0.4)]`}
                     >
-                        Connect to Database
+                        Reconnect
                     </button>
                 </div>
             </div>
         );
     }
     
-    if (isLoading) {
+    if (connectionStatus === 'connecting') {
         return (
             <div className="flex flex-col items-center justify-center h-[60vh]">
-                 <div className="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-cyan-400"></div>
-                 <p className="mt-4 text-lg text-cyan-300 font-orbitron">Fetching Live Metrics...</p>
+                <div className={`w-16 h-16 border-4 border-${color}-900 border-t-${color}-500 rounded-full animate-spin mb-4`}></div>
+                <p className="text-slate-400 animate-pulse">Establishing secure connection...</p>
             </div>
         );
     }
 
-    if (error) {
+    if (isLoading) {
         return (
-            <div className="flex items-center justify-center h-[60vh] text-center">
-                 <div className="bg-red-900/50 border border-red-500 p-8 rounded-lg">
-                    <AlertTriangleIcon className="w-12 h-12 mx-auto text-red-400 mb-4" />
-                    <h2 className="text-2xl font-bold text-red-300 mb-2">Data Fetch Error</h2>
-                    <p className="text-red-200">{error}</p>
-                </div>
+            <div className="flex flex-col items-center justify-center h-[60vh]">
+                 <div className={`w-16 h-16 border-4 border-dashed rounded-full animate-spin border-${color}-400`}></div>
+                 <p className={`mt-4 text-lg text-${color}-300 font-orbitron`}>Fetching Live Metrics...</p>
             </div>
         );
     }
-    
+
     const formatUptime = (seconds: number) => {
         if (seconds <= 0) return '0m';
         const d = Math.floor(seconds / (3600*24));
@@ -147,6 +140,13 @@ const Dashboard: React.FC<DashboardProps> = ({ connectionStatus, connectionError
 
     return (
         <div className="space-y-6">
+            {error && (
+                <div className="bg-red-900/20 border border-red-900/50 p-4 rounded-lg flex items-center gap-3 text-red-400">
+                    <AlertTriangleIcon className="w-5 h-5" />
+                    <p className="text-sm font-medium">{error}</p>
+                </div>
+            )}
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                  <MetricCard icon={<ClockIcon />} title="Uptime" value={formatUptime(metrics.uptime)} />
                  <MetricCard icon={<ZapIcon />} title="Queries/Sec" value={metrics.queriesPerSecond.toLocaleString()} />

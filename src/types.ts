@@ -1,6 +1,8 @@
 
 export type ViewMode = 'dashboard' | 'innodb';
 
+export type ThemeColor = 'cyan' | 'emerald' | 'violet' | 'amber' | 'rose';
+
 export interface DbConnection {
   id: string;
   nickname: string;
@@ -9,6 +11,15 @@ export interface DbConnection {
   user: string;
   password?: string;
   database: string;
+}
+
+export interface Session {
+  id: string;
+  connection: DbConnection;
+  status: 'connected' | 'connecting' | 'error' | 'disconnected';
+  error?: string;
+  color: ThemeColor;
+  viewMode: ViewMode;
 }
 
 export interface SlowQuery {

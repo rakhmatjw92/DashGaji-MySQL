@@ -23,7 +23,7 @@ export const connectToDatabase = async (credentials: { host: string, port: strin
 
 
 export const fetchMetrics = async (sessionId: string): Promise<MySQLMetrics> => {
-    const response = await fetch(`${API_BASE_URL}/api/metrics`, {
+    const response = await fetch(`${API_BASE_URL}/api/metrics?sessionId=${sessionId}`, {
         headers: {
             'x-session-id': sessionId
         }
@@ -36,7 +36,7 @@ export const fetchMetrics = async (sessionId: string): Promise<MySQLMetrics> => 
 };
 
 export const fetchInnoDBStatus = async (sessionId: string): Promise<{ status: string }> => {
-    const response = await fetch(`${API_BASE_URL}/api/innodb-status`, {
+    const response = await fetch(`${API_BASE_URL}/api/innodb-status?sessionId=${sessionId}`, {
         headers: {
             'x-session-id': sessionId
         }

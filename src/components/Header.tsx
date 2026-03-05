@@ -2,7 +2,7 @@
 import React from 'react';
 import { DatabaseIcon, SettingsIcon, ActivityIcon, TermIcon } from './icons';
 import { ConnectionStatus } from '../App';
-import { ViewMode } from '../types';
+import { ViewMode, ThemeColor } from '../types';
 
 interface HeaderProps {
   onSettingsClick: () => void;
@@ -10,6 +10,7 @@ interface HeaderProps {
   databaseName: string;
   viewMode: ViewMode;
   setViewMode: (view: ViewMode) => void;
+  color: ThemeColor;
 }
 
 const Header: React.FC<HeaderProps> = ({ 
@@ -17,7 +18,8 @@ const Header: React.FC<HeaderProps> = ({
   connectionStatus, 
   databaseName, 
   viewMode, 
-  setViewMode 
+  setViewMode,
+  color
 }) => {
   
   const getStatusIndicator = () => {
@@ -48,9 +50,9 @@ const Header: React.FC<HeaderProps> = ({
     <header className="mb-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
-          <DatabaseIcon className="w-10 h-10 text-cyan-400" />
+          <DatabaseIcon className={`w-10 h-10 text-${color}-400`} />
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold font-orbitron text-cyan-400 tracking-wider">
+            <h1 className={`text-2xl sm:text-3xl font-bold font-orbitron text-${color}-400 tracking-wider`}>
               DB GajiKPPN Dashboard
             </h1>
             <p className="text-sm text-slate-400">
@@ -66,14 +68,14 @@ const Header: React.FC<HeaderProps> = ({
           <nav className="flex bg-slate-900/60 p-1 rounded-lg border border-slate-800">
             <button 
               onClick={() => setViewMode('dashboard')}
-              className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === 'dashboard' ? 'bg-cyan-600/20 text-cyan-400' : 'text-slate-400 hover:text-slate-200'}`}
+              className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === 'dashboard' ? `bg-${color}-600/20 text-${color}-400` : 'text-slate-400 hover:text-slate-200'}`}
             >
               <ActivityIcon className="w-4 h-4" />
               Metrics
             </button>
             <button 
               onClick={() => setViewMode('innodb')}
-              className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === 'innodb' ? 'bg-cyan-600/20 text-cyan-400' : 'text-slate-400 hover:text-slate-200'}`}
+              className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === 'innodb' ? `bg-${color}-600/20 text-${color}-400` : 'text-slate-400 hover:text-slate-200'}`}
             >
               <TermIcon className="w-4 h-4" />
               Engine Status
@@ -89,14 +91,6 @@ const Header: React.FC<HeaderProps> = ({
              </span>
              <span className={`${colorClasses.text} font-medium text-xs sm:text-sm`}>{status.text}</span>
            </div>
-           
-          <button 
-            onClick={onSettingsClick}
-            className="p-2 rounded-lg bg-slate-900/60 border border-slate-800 text-slate-400 hover:text-cyan-300 transition-colors"
-            aria-label="Open database settings"
-          >
-            <SettingsIcon className="w-6 h-6" />
-          </button>
         </div>
       </div>
     </header>

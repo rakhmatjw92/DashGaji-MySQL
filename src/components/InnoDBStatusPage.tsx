@@ -2,15 +2,17 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { fetchInnoDBStatus } from '../services/apiService';
 import { ConnectionStatus } from '../App';
+import { ThemeColor } from '../types';
 import { DatabaseIcon, SyncIcon, SearchIcon, ChevronDownIcon, ChevronUpIcon } from './icons';
 
 interface InnoDBStatusPageProps {
   connectionStatus: ConnectionStatus;
   onConnectClick: () => void;
   sessionId: string;
+  color: ThemeColor;
 }
 
-const InnoDBStatusPage: React.FC<InnoDBStatusPageProps> = ({ connectionStatus, onConnectClick, sessionId }) => {
+const InnoDBStatusPage: React.FC<InnoDBStatusPageProps> = ({ connectionStatus, onConnectClick, sessionId, color }) => {
   const [rawStatus, setRawStatus] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -88,7 +90,7 @@ const InnoDBStatusPage: React.FC<InnoDBStatusPageProps> = ({ connectionStatus, o
                 <p className="text-slate-400 mb-6">Connect to a database to inspect the InnoDB engine status.</p>
                 <button 
                     onClick={onConnectClick}
-                    className="px-6 py-2 bg-cyan-600 text-white rounded-md hover:bg-cyan-500 transition-colors shadow-[0_0_10px_rgba(56,189,248,0.4)]"
+                    className={`px-6 py-2 bg-${color}-600 text-white rounded-md hover:bg-${color}-500 transition-colors shadow-[0_0_10px_rgba(var(--color-${color}-500),0.4)]`}
                 >
                     Connect Now
                 </button>
@@ -101,7 +103,7 @@ const InnoDBStatusPage: React.FC<InnoDBStatusPageProps> = ({ connectionStatus, o
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold font-orbitron text-cyan-400">InnoDB Engine Monitor</h2>
+          <h2 className={`text-2xl font-bold font-orbitron text-${color}-400`}>InnoDB Engine Monitor</h2>
           <p className="text-slate-400 text-sm">Detailed internal state of the storage engine</p>
         </div>
         
@@ -113,7 +115,7 @@ const InnoDBStatusPage: React.FC<InnoDBStatusPageProps> = ({ connectionStatus, o
               placeholder="Filter status..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-700 rounded-lg pl-9 pr-4 py-2 text-sm text-slate-200 focus:ring-2 focus:ring-cyan-500 outline-none transition-all"
+              className={`w-full bg-slate-900 border border-slate-700 rounded-lg pl-9 pr-4 py-2 text-sm text-slate-200 focus:ring-2 focus:ring-${color}-500 outline-none transition-all`}
             />
           </div>
           <button 
@@ -161,7 +163,7 @@ const InnoDBStatusPage: React.FC<InnoDBStatusPageProps> = ({ connectionStatus, o
                 className="w-full flex items-center justify-between p-4 hover:bg-slate-800/50 transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <span className="font-orbitron font-bold text-sm tracking-wider text-cyan-300 uppercase">
+                  <span className={`font-orbitron font-bold text-sm tracking-wider text-${color}-300 uppercase`}>
                     {section.title}
                   </span>
                   {hasDeadlock && <span className="bg-red-500 text-[10px] px-1.5 py-0.5 rounded text-white animate-pulse">CRITICAL: DEADLOCK</span>}
