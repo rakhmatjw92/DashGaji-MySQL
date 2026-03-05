@@ -39,13 +39,15 @@ app.post('/api/connect', async (req, res) => {
             user,
             password,
             database,
-            connectionLimit: 10,
+            connectionLimit: 20, // Increased from 10
             enableKeepAlive: true,
+            waitForConnections: true,
+            queueLimit: 0,
+            connectTimeout: 10000,
         });
 
         // Test connection
-        const connection = await pool.getConnection();
-        connection.release();
+        const [rows] = await pool.query("SELECT 1");
 
         dbPools.set(sessionId, pool);
         dbNames.set(sessionId, database);
@@ -70,13 +72,11 @@ app.get('/api/metrics', async (req, res) => {
     }
 
     try {
-        const connection = await dbPool.getConnection();
-        
-        const [globalStatus] = await connection.query("SHOW GLOBAL STATUS;");
-        const [variables] = await connection.query("SHOW VARIABLES;");
+        const [globalStatus] = await dbPool.query("SHOW GLOBAL STATUS;");
+        const [variables] = await dbPool.query("SHOW VARIABLES;");
         
         // Fetch Top 15 Slow Queries (Time > 1s)
-        const [processList] = await connection.query("SELECT * FROM information_schema.PROCESSLIST WHERE command != 'Sleep' AND time > 1 ORDER BY time DESC LIMIT 15;");
+        const [processList] = await dbPool.query("SELECT * FROM information_schema.PROCESSLIST WHERE command != 'Sleep' AND time > 1 ORDER BY time DESC LIMIT 15;");
         
         const statusMap = new Map(globalStatus.map(row => [row.Variable_name, row.Value]));
         const varMap = new Map(variables.map(row => [row.Variable_name, row.Value]));
@@ -84,7 +84,7 @@ app.get('/api/metrics', async (req, res) => {
         // Replication Lag
         let replicationLag = 0;
         try {
-            const [slaveStatus] = await connection.query("SHOW SLAVE STATUS;");
+            const [slaveStatus] = await dbPool.query("SHOW SLAVE STATUS;");
             if (slaveStatus.length > 0 && slaveStatus[0].Seconds_Behind_Master) {
                 replicationLag = slaveStatus[0].Seconds_Behind_Master;
             }
@@ -120,7 +120,6 @@ app.get('/api/metrics', async (req, res) => {
             databaseName: currentDbName,
         };
         
-        connection.release();
         res.json(metrics);
 
     } catch (error) {
@@ -139,9 +138,7 @@ app.get('/api/innodb-status', async (req, res) => {
     }
 
     try {
-        const connection = await dbPool.getConnection();
-        const [rows] = await connection.query("SHOW ENGINE INNODB STATUS;");
-        connection.release();
+        const [rows] = await dbPool.query("SHOW ENGINE INNODB STATUS;");
 
         if (rows && rows.length > 0) {
             // MySQL returns a row with Type, Name, and Status columns

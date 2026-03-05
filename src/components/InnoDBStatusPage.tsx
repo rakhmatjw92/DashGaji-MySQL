@@ -128,8 +128,17 @@ const InnoDBStatusPage: React.FC<InnoDBStatusPageProps> = ({ connectionStatus, o
       </div>
 
       {error && (
-        <div className="p-4 bg-red-900/30 border border-red-500/50 text-red-200 rounded-lg">
-          Error: {error}
+        <div className="p-4 bg-red-900/30 border border-red-500/50 text-red-200 rounded-lg flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <SyncIcon className="w-5 h-5 text-red-400" />
+            <p className="font-medium">Error: {error}</p>
+          </div>
+          <button 
+            onClick={fetchData}
+            className="px-4 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded transition-colors shadow-lg"
+          >
+            Retry Fetch
+          </button>
         </div>
       )}
 

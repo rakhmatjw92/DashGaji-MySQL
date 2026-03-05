@@ -8,6 +8,7 @@
     "dev": "concurrently \"npm run server\" \"vite --port 3000\"",
     "server": "node server.js",
     "build": "tsc && vite build",
+    "lint": "tsc --noEmit",
     "start": "node server.js"
   },
   "dependencies": {

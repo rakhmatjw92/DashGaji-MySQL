@@ -64,17 +64,32 @@ const Dashboard: React.FC<DashboardProps> = ({ connectionStatus, connectionError
     }, [connectionStatus, setDatabaseName, sessionId]);
     
     useEffect(() => {
+        let timeoutId: NodeJS.Timeout;
+        let isMounted = true;
+
+        const poll = async () => {
+            if (connectionStatus === 'connected') {
+                await fetchDataAndAnalysis();
+                if (isMounted) {
+                    timeoutId = setTimeout(poll, 15000); // Wait 15s AFTER previous request completes
+                }
+            }
+        };
+
         if (connectionStatus === 'connected') {
             setIsLoading(true);
-            fetchDataAndAnalysis();
-            const interval = setInterval(fetchDataAndAnalysis, 15000); // Refresh every 15 seconds
-            return () => clearInterval(interval);
+            poll();
         } else {
              setIsLoading(false);
              setMetrics(initialState);
              setHistory([]);
              setDatabaseName('');
         }
+
+        return () => {
+            isMounted = false;
+            if (timeoutId) clearTimeout(timeoutId);
+        };
     }, [connectionStatus, fetchDataAndAnalysis, setDatabaseName]);
 
 
