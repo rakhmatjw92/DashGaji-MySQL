@@ -164,6 +164,14 @@ app.get('/api/innodb-status', async (req, res) => {
         }
     } catch (error) {
         console.error('Error fetching InnoDB status:', error);
+        
+        if (error.code === 'ER_SPECIFIC_ACCESS_DENIED_ERROR' || error.errno === 1227) {
+            return res.status(403).json({ 
+                message: 'Access Denied', 
+                error: 'The database user lacks the PROCESS privilege required to view InnoDB status. Please grant the PROCESS privilege to this user.' 
+            });
+        }
+
         res.status(500).json({ 
             message: 'Error fetching InnoDB status', 
             error: error.message || String(error) || 'Unknown error'

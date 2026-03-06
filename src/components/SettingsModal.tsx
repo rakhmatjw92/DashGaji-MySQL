@@ -86,7 +86,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     
     try {
       // Test connection
-      await connectToDatabase({ host, port, user, password, database }, sessionId);
+      // Use provided sessionId or generate a temporary one for testing
+      const testSessionId = sessionId || generateId();
+      await connectToDatabase({ host, port, user, password, database }, testSessionId);
       
       const newConn: DbConnection = {
         id: generateId(),
