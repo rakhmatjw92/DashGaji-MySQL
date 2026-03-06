@@ -53,6 +53,7 @@ app.post('/api/connect', async (req, res) => {
             waitForConnections: true,
             queueLimit: 0,
             connectTimeout: 10000,
+            maxAllowedPacket: 268435456, // 256MB to handle extremely large status outputs
         });
 
         // Test connection
@@ -151,13 +152,22 @@ app.get('/api/innodb-status', async (req, res) => {
 
         if (rows && rows.length > 0) {
             // MySQL returns a row with Type, Name, and Status columns
-            res.json({ status: rows[0].Status });
+            // Column names can vary in case depending on server configuration
+            const status = rows[0].Status || rows[0].status;
+            if (status) {
+                res.json({ status });
+            } else {
+                res.status(404).json({ message: 'InnoDB status column not found in result' });
+            }
         } else {
             res.status(404).json({ message: 'No InnoDB status found' });
         }
     } catch (error) {
         console.error('Error fetching InnoDB status:', error);
-        res.status(500).json({ message: 'Error fetching InnoDB status', error: error.message });
+        res.status(500).json({ 
+            message: 'Error fetching InnoDB status', 
+            error: error.message || String(error) || 'Unknown error'
+        });
     }
 });
 

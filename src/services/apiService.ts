@@ -43,7 +43,8 @@ export const fetchInnoDBStatus = async (sessionId: string): Promise<{ status: st
     });
     if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to fetch InnoDB status');
+        const detail = errorData.error ? `: ${errorData.error}` : '';
+        throw new Error(`${errorData.message || 'Failed to fetch InnoDB status'}${detail}`);
     }
     return await response.json();
 };

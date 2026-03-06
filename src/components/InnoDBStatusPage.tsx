@@ -40,8 +40,9 @@ const InnoDBStatusPage: React.FC<InnoDBStatusPageProps> = ({ connectionStatus, o
   const sections = useMemo(() => {
     if (!rawStatus) return [];
     
-    // Split the status into sections based on typical MySQL headers (all caps with dashes/equals)
-    const headerRegex = /-{5,}\n([A-Z\s\/]+)\n-{5,}/g;
+    // Split the status into sections based on typical MySQL headers
+    // Handles both dashes (---) and equals (===) and allows for more characters in titles
+    const headerRegex = /[=-]{5,}\r?\n([^\n]+)\r?\n[=-]{5,}/g;
     const parts: { title: string; content: string }[] = [];
     
     let lastIndex = 0;
@@ -183,7 +184,7 @@ const InnoDBStatusPage: React.FC<InnoDBStatusPageProps> = ({ connectionStatus, o
           );
         })}
         
-        {filteredSections.length === 0 && (
+        {filteredSections.length === 0 && !isLoading && !error && (
           <div className="py-20 text-center text-slate-500 italic">
             No sections match your search criteria.
           </div>
